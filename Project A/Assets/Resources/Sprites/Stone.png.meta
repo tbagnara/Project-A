@@ -1,12 +1,5 @@
 fileFormatVersion: 2
-guid: d9c7df35c6600dd42b897ce1d9ae898b
-AssetOrigin:
-  serializedVersion: 1
-  productId: 177430
-  packageName: Free 2D Mega Pack
-  packageVersion: 1.0
-  assetPath: Assets/Brackeys/2D Mega Pack/Items & Icons/Gold Miner/Diamond.png
-  uploadId: 386437
+guid: a5af82eee0b249a40893271ee1c2e34d
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -55,12 +48,12 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 10
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: -1
+  spriteTessellationDetail: 1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -86,7 +79,7 @@ TextureImporter:
     overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
     maxTextureSize: 2048
@@ -99,7 +92,7 @@ TextureImporter:
     overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
@@ -112,16 +105,31 @@ TextureImporter:
     overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites: []
     outline: []
     customData: 
-    physicsShape: []
+    physicsShape:
+    - - {x: -7, y: -8}
+      - {x: 7, y: -8}
+      - {x: 8, y: -7}
+      - {x: 8, y: -4}
+      - {x: 9, y: -3}
+      - {x: 9, y: 7}
+      - {x: 7, y: 9}
+      - {x: 4, y: 9}
+      - {x: 3, y: 10}
+      - {x: -4, y: 10}
+      - {x: -5, y: 9}
+      - {x: -7, y: 9}
+      - {x: -9, y: 7}
+      - {x: -9, y: -5}
+      - {x: -8, y: -7}
     bones: []
-    spriteID: 9ac4c2da7d10d09459202137caf60911
-    internalID: 2005538863
+    spriteID: 630383c60aeba9e439405dc0bce57fa6
+    internalID: -890201766
     vertices: []
     indices: 
     edges: []

@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
+
+
     void Start()
     {
         
@@ -28,4 +30,7 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+
+
 }

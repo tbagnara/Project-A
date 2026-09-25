@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 using System;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private float moveInput;
     public bool isGrounded;
     float dist = 0.01f;
+    public static event Action<String> onLevelComplete;
 
     public event Action onDamage;
     void Start()
@@ -61,9 +63,13 @@ public class PlayerController : MonoBehaviour
         {
             case "Spikes":
                 Time.timeScale = 0;
+                Time.timeScale = 1;
+                SceneManager.LoadScene("MainMenus");
                 break;
             case "Goal":
                 Time.timeScale = 0;
+                onLevelComplete?.Invoke(SceneManager.GetActiveScene().name );
+                SceneManager.LoadScene("MainMenus");
                 break;
         }
 
