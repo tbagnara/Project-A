@@ -9,8 +9,8 @@ public class Credits : MonoBehaviour
 
     void Start()
     {
-        StartMenuCamera.enabled = true;
-        StartMenuCamera.GetComponent<AudioListener>().enabled = true;
+        //StartMenuCamera.enabled = true;
+        //StartMenuCamera.GetComponent<AudioListener>().enabled = true;
         CreditsCamera.enabled = false;
         CreditsCamera.GetComponent<AudioListener>().enabled = false;
     }
