@@ -3,11 +3,9 @@ using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations;
-//using UnityEngine.InputSystem;
 using System;
 using UnityEngine.SceneManagement;
 using System.Collections;
-using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,19 +13,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpHeight = 7f;
     private Rigidbody2D rb;
     private CharacterController controller;
-    private float moveInput;
-    public bool isGrounded;
-    private bool ended;
-    float dist = 0.01f;
-    public static event Action<String> onLevelComplete;
+    public ContactFilter2D ContactFilterDown;
+    public ContactFilter2D ContactFilterLeft;
+    public ContactFilter2D ContactFilterRight;
 
-    [SerializeField] private GameObject pauseMenu;
-    [SerializeField] private TextMeshProUGUI MenuText;
 
-    public event Action onDamage;
+    public static event Action<String, float> onLevelComplete;
+    public static event Action onLevelFail;
+    float timeSinceLoad;
+    public bool IsGrounded => rb.IsTouching(ContactFilterDown);
+    public bool IsTouchingRight => rb.IsTouching(ContactFilterRight);
+    public bool IsTouchingLeft => rb.IsTouching(ContactFilterLeft);
+
     void Start()
     {
-        pauseMenu.transform.position = new UnityEngine.Vector3(-100, 0, -1);
         controller = GetComponent<CharacterController>();
         rb = GetComponent<Rigidbody2D>();    
         Time.timeScale = 1;    
@@ -37,74 +36,45 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         Jump();
-        Pause();
     }
 
-    void FixedUpdate()
-    {
-        
     
-    }
 
-    void Pause()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape) && !ended)
-        {
-            if (Time.timeScale == 1)
-            {
-                MenuText.text = "- - - Paused - - -";
-                pauseMenu.transform.position = new UnityEngine.Vector3(0, 0, -1);
-                Time.timeScale = 0;
-            }
-            else
-            {
-                pauseMenu.transform.position = new UnityEngine.Vector3(-100, 0, -1);
-                Time.timeScale = 1;
-            }
-        }
-    }
-
-    void Move()
+    void Move() // Directional Movement
     {
         
         float moveInput = Input.GetAxis("Horizontal");
 
-        rb.linearVelocityX = moveInput * moveSpeed;
+        if ((moveInput < 0 && !IsTouchingLeft) || (moveInput > 0 && !IsTouchingRight) )
+        {
+            rb.linearVelocityX = moveInput * moveSpeed;
+        }
+        else if ((moveInput < 0 && IsTouchingLeft) || (moveInput > 0 && IsTouchingRight) )
+        {
+            rb.linearVelocityX = 0;
+        }
+
         
     }
 
-    void Jump()
+    void Jump() // Vertical Movement
     {
-        isGrounded = Physics2D.CircleCast(transform.position, 0.25f, UnityEngine.Vector2.down, dist);
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && IsGrounded)
         {
             rb.linearVelocityY = jumpHeight;   
         }
     }
 
-    //void OnCollisionExit2D(Collision2D collision)
-    IEnumerator OnTriggerEnter2D(Collider2D collision)
+    void OnTriggerEnter2D(Collider2D collision)  // Spikes - death, Goal - win
     {
         switch( collision.gameObject.tag.ToString() )
         {
             case "Spikes":
-                ended = true;
-                Time.timeScale = 0;
-                MenuText.text = "- - You Died - -";
-                pauseMenu.transform.position = new UnityEngine.Vector3(0, 0, -1);
-                yield return new WaitForSecondsRealtime(2f);
-                
-                SceneManager.LoadScene("MainMenus");
+                onLevelFail?.Invoke();
                 break;
-            case "Goal":
-                ended = true;
-                Time.timeScale = 0;
-                MenuText.text = "- Level Cleared -";
-                pauseMenu.transform.position = new UnityEngine.Vector3(0, 0, -1);
-                yield return new WaitForSecondsRealtime(2f);
 
-                onLevelComplete?.Invoke(SceneManager.GetActiveScene().name );
-                SceneManager.LoadScene("MainMenus");
+            case "Goal":
+                onLevelComplete?.Invoke(SceneManager.GetActiveScene().name, GameManager.Instance.getTimeSinceLoad() );
                 break;
         }
 

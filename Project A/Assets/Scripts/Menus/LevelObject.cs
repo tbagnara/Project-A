@@ -18,11 +18,18 @@ public class LevelObject : MonoBehaviour
     {
         sp = GetComponent<SpriteRenderer>();
         LevelName = gameObject.name;
+        LoadSpriteFiles();
+        SetSprite();    
+    }
 
+    void LoadSpriteFiles()
+    {
         notAvailable = Resources.Load<Sprite>("Sprites/Stone");
         isAvailable = Resources.Load<Sprite>("Sprites/SoulFragment");
         isBeaten = Resources.Load<Sprite>("Sprites/Diamond");
-
+    }
+    void SetSprite()
+    {
         if (LevelManager.Instance.isAvailable(LevelName) )
         {
             sp.sprite = isAvailable;
@@ -36,13 +43,7 @@ public class LevelObject : MonoBehaviour
         {
             sp.sprite = isBeaten;
         }
-        
-            
     }
 
     
-    void Update()
-    {
-        
-    }
 }

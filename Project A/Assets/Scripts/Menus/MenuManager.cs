@@ -6,100 +6,117 @@ using System.Linq;
 using System.Globalization;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Linq.Expressions;
+using Unity.VisualScripting;
 
 public class MenuManager : MonoBehaviour
 {
 
-    public Camera StartMenuCamera;
-    public Camera LevelSelectCamera;
+    public GameObject StartMenuScreen;  // Screen includes camera and canvas
+    public GameObject LevelSelectScreen;
+    public GameObject CreditsScreen;
     private int levelSelected;
+    private Boolean enteredLevelScreen = false;
     public TextMeshProUGUI levelText;
     [SerializeField] public List<GameObject> Levels;
+    [SerializeField] private TextMeshProUGUI time;
 
     void Start()
     {
         levelSelected = LevelManager.Instance.levelSelected;
         UpdateLevelText();
-        transform.position = new Vector2(Levels.ElementAt(levelSelected).transform.position.x, transform.position.y);
-        StartMenuCamera.enabled = true;
-        LevelSelectCamera.enabled = false;
-        LevelSelectCamera.GetComponent<AudioListener>().enabled = false;
+        UpdateTimeText();
         
-        if (LevelManager.Instance.GameStarted) {
-            StartMenuCamera.GetComponent<AudioListener>().enabled = false;
-            StartMenuCamera.enabled = false;
-            LevelSelectCamera.enabled = true;
-            LevelSelectCamera.GetComponent<AudioListener>().enabled = true;
+        if (Time.unscaledTime < 5) // Determines if the game should should load into the main menu or the level select screen
+        {
+            SetCamera("StartMenu");
+        }
+        else {
+            SetCamera("LevelMenu");
         }
     }
 
     void Update()
     {
-        InputForMove();
-        Move();
-        Select();
+        MoveInput();
+        MoveLevelSelectCharacter();
+        SelectLevel();
     }
 
-    void Select()
+    void SelectLevel()
     {
         if (Input.GetKeyDown(KeyCode.Space) )
         {
             LevelManager.Instance.levelSelected = levelSelected;
-            SceneManager.LoadScene(""+(levelSelected/8 + 1) + "-" + (levelSelected%8 + 1));
+            SceneManager.LoadScene(""+(levelSelected/8 + 1) + " - " + (levelSelected%8 + 1));
         }
-        if (!LevelManager.Instance.GameStarted) 
-            LevelManager.Instance.GameStarted = true;
+        if (enteredLevelScreen == false) 
+            enteredLevelScreen = true;
     }
-
-
-    void Pause()
+    public void MoveInput() // Gets input, changes which level is selected
     {
-        if ( Input.GetButtonDown("Cancel") )
-        {
-            
-        }
-    }
-
-    public void LevelSelectScreen()
-    {
-        StartMenuCamera.GetComponent<AudioListener>().enabled = false;
-        StartMenuCamera.enabled = false;
-        LevelSelectCamera.enabled = true;
-        LevelSelectCamera.GetComponent<AudioListener>().enabled = true;
-        //StartMenuCamera.transform.position = new Vector3(0, -10, -10);
-    }
-
-    public void InputForMove()
-    {
-        if (!LevelSelectCamera.isActiveAndEnabled) return;
+        if (enteredLevelScreen == false) return;
         
-        if (Input.GetKeyDown(KeyCode.A) && levelSelected !=0)
+        if (Input.GetKeyDown(KeyCode.A) && levelSelected%8 !=0)
         {
             levelSelected--;
-            UpdateLevelText();
         }
-        else if (Input.GetKeyDown(KeyCode.D) && LevelManager.Instance.levelsBeaten[levelSelected] )
+        else if (Input.GetKeyDown(KeyCode.D) && LevelManager.Instance.levelsBeaten[levelSelected] && (levelSelected +1 ) != Levels.Count)
         {
             levelSelected++;
-            UpdateLevelText();
+        } 
+        else
+        {
+            return;
         }
-
+        UpdateLevelText();
+        UpdateTimeText();
     }
 
-    public void Move()
+    public void MoveLevelSelectCharacter()  // Changes the position of character
     {
-        try {
-            transform.position = Vector2.MoveTowards(transform.position, new Vector2(Levels.ElementAt(levelSelected).transform.position.x, transform.position.y) , 10*Time.deltaTime);
-        }
-        catch
-        {
-            
-        }
+        transform.position = Vector2.MoveTowards(transform.position, new Vector2(Levels.ElementAt(levelSelected).transform.position.x, transform.position.y) , 10*Time.deltaTime);
     }
 
     public void UpdateLevelText()
     {
-        levelText.text = "Level: " + (levelSelected/8 + 1) + " - " + (levelSelected%8 + 1);
+        levelText.text = "" + (levelSelected/8 + 1) + " - " + (levelSelected%8 + 1);
+    }
+
+    public void UpdateTimeText()
+    {
+        try 
+        {
+            float fastestTime = DatabaseManager.Instance.GetTopTime(levelText.text).CompletionTime;
+            fastestTime = (float)Math.Round(fastestTime, 2); 
+            time.text = ""+fastestTime + "s";
+        }
+        catch 
+        {
+            time.text = "---";
+        }
+    }
+    public void SetCamera(String cam)
+    {
+        LevelSelectScreen.SetActive(false);
+        StartMenuScreen.SetActive(false);
+        CreditsScreen.SetActive(false);
+
+        switch (cam)
+        {
+            case "StartMenu":
+                StartMenuScreen.SetActive(true);
+                break;
+            
+            case "LevelMenu":
+                LevelSelectScreen.SetActive(true);
+                break;
+
+            case "CreditsMenu":
+                CreditsScreen.SetActive(true);
+                break;       
+        }
+
     }
 
 }
