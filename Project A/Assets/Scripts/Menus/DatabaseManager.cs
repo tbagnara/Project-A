@@ -1,3 +1,5 @@
+// Saving to JSON file code is from Rize Education class GDM4 - C# programming
+
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
@@ -49,15 +51,13 @@ public class DatabaseManager : MonoBehaviour
         savePath = Path.Combine(Application.persistentDataPath, "playertime.json");
         LoadPlayerData();
         
-        
     }
-    
     
     public void SaveLevelTime(string level, string playerName, float completionTime)
     {
 
         HighScore newScore = new HighScore(level, playerName, completionTime);
-        SaveTime(newScore);
+        AddTime(newScore);
         
         Debug.Log("High score saved: " + level + " - " + playerName + " - " + completionTime);
     }
@@ -76,7 +76,7 @@ public class DatabaseManager : MonoBehaviour
         }
         catch
         {
-            time = -1;
+            time = -1; // Indicates a player has yet to set a record
         }
             
         return time;
@@ -97,14 +97,11 @@ public class DatabaseManager : MonoBehaviour
         }
         catch
         {
-            player = "-----";
+            player = "-----"; // Indicates a player has yet to set a record
         }
             
         return player;
     }
-
-
-
 
     public void SavePlayerData()
     {
@@ -137,13 +134,13 @@ public class DatabaseManager : MonoBehaviour
         }
     }
     
-    void CreateNewPlayerData()      // Create savedata
+    void CreateNewPlayerData()
     {
         playerData = new PlayerTimeData();
         SavePlayerData();
     }
     
-    public void SaveTime(HighScore levelTimeData)
+    public void AddTime(HighScore levelTimeData)   
     {
         playerData.levelTimes.Add(levelTimeData);
         SavePlayerData();

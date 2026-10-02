@@ -15,20 +15,24 @@ public class MenuManager : MonoBehaviour
     public GameObject StartMenuScreen;  // Screen includes camera and canvas
     public GameObject LevelSelectScreen;
     public GameObject CreditsScreen;
-    private int levelSelected;
-    private Boolean enteredLevelScreen = false;
     public TextMeshProUGUI levelText;
     [SerializeField] public List<GameObject> Levels;
     [SerializeField] private TextMeshProUGUI time;
     [SerializeField] private TextMeshProUGUI player;
-
+    private int levelSelected;
+    private Boolean enteredLevelScreen = false;
     void Start()
     {
         levelSelected = LevelManager.Instance.levelSelected;
         UpdateLevelText();
         UpdateTimeText();
+
+        if (Time.unscaledTime < 4)
+        {
+            enteredLevelScreen = false;
+        }
         
-        if (Time.unscaledTime < 5) // Determines if the game should should load into the main menu or the level select screen
+        if (enteredLevelScreen == false) // Determines if the game has jsut been opened - if so boot into the main menu, else the level select screen
         {
             SetCamera("StartMenu");
         }
@@ -52,8 +56,6 @@ public class MenuManager : MonoBehaviour
             LevelManager.Instance.levelSelected = levelSelected;
             SceneManager.LoadScene(""+(levelSelected/8 + 1) + " - " + (levelSelected%8 + 1));
         }
-        if (enteredLevelScreen == false) 
-            enteredLevelScreen = true;
     }
     public void MoveInput() // Gets input, changes which level is selected
     {
@@ -115,6 +117,7 @@ public class MenuManager : MonoBehaviour
                 break;
             
             case "LevelMenu":
+                enteredLevelScreen = true;
                 LevelSelectScreen.SetActive(true);
                 break;
 

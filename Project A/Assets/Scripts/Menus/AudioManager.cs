@@ -1,9 +1,10 @@
+// Code is from Rize Education class GDM4 - C# programming
+
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-
     public static AudioManager Instance { get; private set; }
     public AudioSource musicSource;
     public AudioSource sfxSource;

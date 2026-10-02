@@ -12,34 +12,28 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI MenuText;
     [SerializeField] private TextMeshProUGUI LevelText;
     [SerializeField] private TextMeshProUGUI TimeText;
+    [SerializeField] private TMP_InputField recordName;   // Input field text 
     String sceneName;
-    Boolean gameEnded = false;
-    float timeSinceLoad ;
-    [SerializeField] private TMP_InputField recordName;
-    String recordLevel;
-    float recordTime;
+    private Boolean gameEnded = false;
+    private float timeSinceLoad;
+
+    private string recordLevel;
+    private float recordTime;
     void Awake()
     {
-        if(Instance!=null && Instance !=this)
-        {
-            Destroy(gameObject);
-            return;
-        }
         Instance = this;
-
-        //DontDestroyOnLoad(gameObject);
     }
 
     void OnEnable()
     {
-        PlayerController.onLevelComplete += Win;
-        PlayerController.onLevelFail += Failure;
+        PlayerController.onLevelComplete += HandleWin;
+        PlayerController.onLevelFail += HandleFailure;
     }
 
     void OnDisable()
     {
-        PlayerController.onLevelComplete -= Win;
-        PlayerController.onLevelFail -= Failure;
+        PlayerController.onLevelComplete -= HandleWin;
+        PlayerController.onLevelFail -= HandleFailure;
 
     }
     void Start()
@@ -50,15 +44,17 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        Pause();
+        PauseMenu();
         timeSinceLoad = Time.timeSinceLevelLoad;
         TimeText.text = ""+ Math.Floor(timeSinceLoad);
     }
-    void Pause()
+    void PauseMenu()
     {
-        if ( (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace) )&& !gameEnded )
+        if (gameEnded) return;
+        if ( Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace) )
         {
-            if (pauseMenu.GetComponent<Canvas>().isActiveAndEnabled == false)
+            Canvas pauseMenuCanvas = pauseMenu.GetComponent<Canvas>();
+            if (pauseMenuCanvas.isActiveAndEnabled == false) 
             {
                 DisplayPauseMenu("Pause");
                 Time.timeScale = 0;
@@ -70,42 +66,35 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-    void Failure()
+    void HandleFailure()
     {
         gameEnded = true;
-        DisplayPauseMenu("Failure");
         Time.timeScale = 0;
-        
-
+        DisplayPauseMenu("Failure");
         StartCoroutine( WaitTimeThenLoad(2) );
     }
 
-    void Win(String l)
+    void HandleWin(String levelName)
     {
         gameEnded = true;
         Time.timeScale = 0;
-        float t = timeSinceLoad;
+        float levelCompletionTime = timeSinceLoad;
         
-        LevelManager.Instance.UpdateLevelData(l, t);
+        LevelManager.Instance.UpdateLevelData(levelName, levelCompletionTime);
         
-        float timeToBeat = DatabaseManager.Instance.GetTopTime(l);
-        if (t < timeToBeat || timeToBeat == -1)
+        float timeToBeat = DatabaseManager.Instance.GetTopTime(levelName); 
+        if (levelCompletionTime < timeToBeat || timeToBeat == -1)   // Faster time or first clear
         {
-            recordTime = t;
-            recordLevel = l;
-            DisplayRecordTimeMenu();
+            recordTime = levelCompletionTime;
+            recordLevel = levelName;
+            recordMenu.GetComponent<Canvas>().enabled = true;
         }
-        else
+        else    // Slower time = no time recorded
         {
-            DisplayPauseMenu("Win");
+            DisplayPauseMenu("SlowWin");
             StartCoroutine( WaitTimeThenLoad(2) );
         }
         
-    }
-
-    public Boolean IsGameOver()
-    {
-        return gameEnded;
     }
 
     IEnumerator WaitTimeThenLoad(float seconds)
@@ -116,13 +105,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("MainMenus");
     }
 
-
-    public float getTimeSinceLoad()
-    {
-        return timeSinceLoad;
-    }
-
-    void DisplayPauseMenu(String s)    // Brings UI ontoscreen
+    void DisplayPauseMenu(String s)    // Brings UI (pauseMenu) ontoscreen, changes text based on which menu is in use
     {
         switch (s) 
         {
@@ -132,7 +115,7 @@ public class GameManager : MonoBehaviour
             case "Failure":
                 MenuText.text = "- - You Died - -";  
                 break;
-            case "Win":
+            case "SlowWin": // Won but not record time
                 MenuText.text = "- Level Cleared -";
                 break;
             default:
@@ -143,7 +126,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void RecordPlayerName(String name)
+    public void RecordPlayerName(String name) // Triggered when input field is exited
     {
         
         string playerName = recordName.text;
@@ -155,8 +138,9 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         SceneManager.LoadScene("MainMenus");
     }
-    void DisplayRecordTimeMenu()
+    public Boolean IsGameOver()
     {
-        recordMenu.GetComponent<Canvas>().enabled = true;
+        return gameEnded;
     }
+    
 }

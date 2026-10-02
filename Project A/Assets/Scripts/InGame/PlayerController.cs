@@ -1,3 +1,4 @@
+// Code from Rize Education class GDM4 - C# programming
 using System.Numerics;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
@@ -9,8 +10,8 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 5f; 
-    [SerializeField] private float jumpHeight = 7f;
+    private float moveSpeed = 5f; 
+    private float jumpHeight = 7f;
     private Rigidbody2D rb;
     private CharacterController controller;
     private SpriteRenderer sp;
@@ -24,10 +25,9 @@ public class PlayerController : MonoBehaviour
 
     public static event Action<String> onLevelComplete;
     public static event Action onLevelFail;
-    float timeSinceLoad;
-    public bool IsGrounded => rb.IsTouching(ContactFilterDown);
-    public bool IsTouchingRight => rb.IsTouching(ContactFilterRight);
-    public bool IsTouchingLeft => rb.IsTouching(ContactFilterLeft);
+    private bool IsGrounded => rb.IsTouching(ContactFilterDown);
+    private bool IsTouchingRight => rb.IsTouching(ContactFilterRight);
+    private bool IsTouchingLeft => rb.IsTouching(ContactFilterLeft);
 
     void Start()
     {
@@ -48,9 +48,10 @@ public class PlayerController : MonoBehaviour
     void Move() // Directional Movement
     {
         if (GameManager.Instance.IsGameOver() ) return;
+        if (Time.timeScale == 0) return;
         float moveInput = Input.GetAxis("Horizontal");
 
-        if (    ( (moveInput < 0 && !IsTouchingLeft) || (moveInput > 0 && !IsTouchingRight) ) && Time.timeScale >0 )
+        if ( (moveInput < 0 && !IsTouchingLeft) || (moveInput > 0 && !IsTouchingRight) ) // If input to move and not walking into a wall
         {
             rb.linearVelocityX = moveInput * moveSpeed;
             if (moveInput < 0)
@@ -67,20 +68,22 @@ public class PlayerController : MonoBehaviour
             }
             return;
         }
-        else if ((moveInput < 0 && IsTouchingLeft) || (moveInput > 0 && IsTouchingRight) )
+        else if ((moveInput < 0 && IsTouchingLeft) || (moveInput > 0 && IsTouchingRight) ) // If input to move and walking into wall. This prevents the player from clinging to walls
         {
             rb.linearVelocityX = 0;
         }
-
-        sp.sprite = facingForward;
-
+        else if (moveInput == 0)
+        {
+            sp.sprite = facingForward;            
+        }
         
     }
 
     void Jump() // Vertical Movement
     {
         if (GameManager.Instance.IsGameOver() ) return;
-        if (Input.GetButtonDown("Jump") && IsGrounded && Time.timeScale > 0)
+        if (Time.timeScale == 0) return;
+        if (Input.GetButtonDown("Jump") && IsGrounded)
         {
             rb.linearVelocityY = jumpHeight; 
             AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.jumpSound);  
@@ -98,11 +101,9 @@ public class PlayerController : MonoBehaviour
 
             case "Goal":
                 AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.goalSound);
-
                 onLevelComplete?.Invoke(SceneManager.GetActiveScene().name );
                 break;
         }
-
         
     }
 

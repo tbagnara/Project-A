@@ -1,3 +1,5 @@
+// Saving to JSON file code is from Rize Education class GDM4 - C# programming
+
 using System;
 using UnityEngine;
 using System.IO;

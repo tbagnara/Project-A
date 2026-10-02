@@ -32,7 +32,7 @@ public class LevelManager : MonoBehaviour
 
     public void UpdateLevelData(String l, float t)  // Saves level completion and time
     {
-        UnityEngine.Vector2 worldLevel = convertToInt(l);   
+        UnityEngine.Vector2 worldLevel = convertWorldStringToInt(l);   
         int worldNum = (int) worldLevel.x;
         int levelNum = (int) worldLevel.y;
         int levelValue = (worldNum - 1) * 8 + levelNum - 1; //  Converts world and level integers into a single value determing which level it is in order
@@ -50,7 +50,7 @@ public class LevelManager : MonoBehaviour
     }
     public Boolean isBeaten(String str) // Helper
     {
-        UnityEngine.Vector2 num = convertToInt(str);
+        UnityEngine.Vector2 num = convertWorldStringToInt(str);
         int world = (int) num.x;
         int level = (int) num.y;
         return isBeaten(world, level);
@@ -58,28 +58,28 @@ public class LevelManager : MonoBehaviour
     }
     public Boolean isAvailable(int w, int l)    // Determines if a level has been unlocked
     {
-        if (w == 1 && l == 1) return true;
-        if (l == 1)
+        if (w == 1 && l == 1) return true; // If level 1, automatically unlocked
+        if (l == 1) // If level 1 of a different world, checks the last level of the previous world
         {
             w -= 1; 
             l = 8;
         }
         else
         {
-            l -=1;
+            l -=1; // Checks previous level
         }
         return isBeaten(w, l);
     }
     public Boolean isAvailable(String str) // Helper
     {
-        UnityEngine.Vector2 num = convertToInt(str);
+        UnityEngine.Vector2 num = convertWorldStringToInt(str);
         int world = (int) num.x;
         int level = (int) num.y;
   
         return isAvailable(world, level);
 
     }
-    public UnityEngine.Vector2 convertToInt(String l)   // Converts the string level name into an a vector containing integers of world and level
+    public UnityEngine.Vector2 convertWorldStringToInt(String l)   // Converts the string level name into an a vector containing integers of world and level
     {
         char world = l[0];
         int worldNum = world - '0';
