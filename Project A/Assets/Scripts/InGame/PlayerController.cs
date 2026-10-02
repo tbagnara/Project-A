@@ -13,12 +13,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpHeight = 7f;
     private Rigidbody2D rb;
     private CharacterController controller;
+    private SpriteRenderer sp;
     public ContactFilter2D ContactFilterDown;
     public ContactFilter2D ContactFilterLeft;
     public ContactFilter2D ContactFilterRight;
+    public Sprite facingLeft;
+    public Sprite facingRight;
+    public Sprite facingForward;
 
 
-    public static event Action<String, float> onLevelComplete;
+    public static event Action<String> onLevelComplete;
     public static event Action onLevelFail;
     float timeSinceLoad;
     public bool IsGrounded => rb.IsTouching(ContactFilterDown);
@@ -29,6 +33,7 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         rb = GetComponent<Rigidbody2D>();    
+        sp = GetComponent<SpriteRenderer>();
         Time.timeScale = 1;    
     }
 
@@ -42,26 +47,43 @@ public class PlayerController : MonoBehaviour
 
     void Move() // Directional Movement
     {
-        
+        if (GameManager.Instance.IsGameOver() ) return;
         float moveInput = Input.GetAxis("Horizontal");
 
-        if ((moveInput < 0 && !IsTouchingLeft) || (moveInput > 0 && !IsTouchingRight) )
+        if (    ( (moveInput < 0 && !IsTouchingLeft) || (moveInput > 0 && !IsTouchingRight) ) && Time.timeScale >0 )
         {
             rb.linearVelocityX = moveInput * moveSpeed;
+            if (moveInput < 0)
+            {
+                sp.sprite = facingLeft;
+            }
+            else
+            {
+                sp.sprite = facingRight;
+            }
+            if (IsGrounded)
+            {
+                AudioManager.Instance.PlayWalkingSoundEffect();                
+            }
+            return;
         }
         else if ((moveInput < 0 && IsTouchingLeft) || (moveInput > 0 && IsTouchingRight) )
         {
             rb.linearVelocityX = 0;
         }
 
+        sp.sprite = facingForward;
+
         
     }
 
     void Jump() // Vertical Movement
     {
-        if (Input.GetButtonDown("Jump") && IsGrounded)
+        if (GameManager.Instance.IsGameOver() ) return;
+        if (Input.GetButtonDown("Jump") && IsGrounded && Time.timeScale > 0)
         {
-            rb.linearVelocityY = jumpHeight;   
+            rb.linearVelocityY = jumpHeight; 
+            AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.jumpSound);  
         }
     }
 
@@ -70,11 +92,14 @@ public class PlayerController : MonoBehaviour
         switch( collision.gameObject.tag.ToString() )
         {
             case "Spikes":
-                onLevelFail?.Invoke();
+                AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.spikesSound);
+                onLevelFail?.Invoke();  
                 break;
 
             case "Goal":
-                onLevelComplete?.Invoke(SceneManager.GetActiveScene().name, GameManager.Instance.getTimeSinceLoad() );
+                AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.goalSound);
+
+                onLevelComplete?.Invoke(SceneManager.GetActiveScene().name );
                 break;
         }
 

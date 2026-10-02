@@ -20,6 +20,7 @@ public class MenuManager : MonoBehaviour
     public TextMeshProUGUI levelText;
     [SerializeField] public List<GameObject> Levels;
     [SerializeField] private TextMeshProUGUI time;
+    [SerializeField] private TextMeshProUGUI player;
 
     void Start()
     {
@@ -34,6 +35,7 @@ public class MenuManager : MonoBehaviour
         else {
             SetCamera("LevelMenu");
         }
+        AudioManager.Instance.PlayMusic(AudioManager.Instance.backgroundMusic);
     }
 
     void Update()
@@ -65,12 +67,9 @@ public class MenuManager : MonoBehaviour
         {
             levelSelected++;
         } 
-        else
-        {
-            return;
-        }
         UpdateLevelText();
         UpdateTimeText();
+
     }
 
     public void MoveLevelSelectCharacter()  // Changes the position of character
@@ -85,16 +84,23 @@ public class MenuManager : MonoBehaviour
 
     public void UpdateTimeText()
     {
-        try 
+        String level = levelText.text;
+        float fastestTime = DatabaseManager.Instance.GetTopTime(level);
+        fastestTime = (float)Math.Round(fastestTime, 1); 
+        
+        if (fastestTime >-1)
         {
-            float fastestTime = DatabaseManager.Instance.GetTopTime(levelText.text).CompletionTime;
-            fastestTime = (float)Math.Round(fastestTime, 2); 
             time.text = ""+fastestTime + "s";
         }
-        catch 
+        else
         {
             time.text = "---";
         }
+
+        String fastestPlayer = DatabaseManager.Instance.GetTopPlayer(levelText.text);
+
+        player.text = fastestPlayer;
+
     }
     public void SetCamera(String cam)
     {

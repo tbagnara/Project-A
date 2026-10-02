@@ -21,7 +21,10 @@ public class LevelManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
-
+    void Start()
+    {
+        LoadData( SaveLoadManager.Instance.GetLevelsBeatenData() );
+    }
     public void LoadData(Boolean[] data)
     {
         levelsBeaten = data;
@@ -35,7 +38,7 @@ public class LevelManager : MonoBehaviour
         int levelValue = (worldNum - 1) * 8 + levelNum - 1; //  Converts world and level integers into a single value determing which level it is in order
 
         levelsBeaten[ levelValue ] = true;    
-        SaveLoadManager.Instance.SaveData(levelsBeaten);          
+        SaveLoadManager.Instance.SaveData(levelsBeaten);
     }
 
     public Boolean isBeaten(int w, int l) // Determines if a level has been beaten

@@ -30,13 +30,13 @@ public class SaveLoadManager : MonoBehaviour
         
         savePath = Path.Combine(Application.persistentDataPath, "playersave.json");
         LoadPlayerData();
-        LevelManager.Instance.LoadData( GetLevelsBeatenData() );
     }
     public void SavePlayerData()
     {
         playerData.lastPlayed = System.DateTime.Now.ToString();
         string json = JsonUtility.ToJson(playerData, true);
         File.WriteAllText(savePath, json);
+        Application.ExternalEval("_JS_FileSystem_Sync();");
         Debug.Log("Player data saved!");
     }
     

@@ -123,8 +123,8 @@ TextureImporter:
       - {x: 4, y: -3}
       - {x: -4, y: -3}
       - {x: -7, y: -6}
-      - {x: -7, y: -8}
-      - {x: 7, y: -8}
+      - {x: -7, y: -7}
+      - {x: 7, y: -7}
     bones: []
     spriteID: 8913faf1b08db2d4991128840d55741a
     internalID: 486132838

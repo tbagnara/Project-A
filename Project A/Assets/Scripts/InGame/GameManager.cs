@@ -8,12 +8,16 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; private set; }
     [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject recordMenu;
     [SerializeField] private TextMeshProUGUI MenuText;
     [SerializeField] private TextMeshProUGUI LevelText;
     [SerializeField] private TextMeshProUGUI TimeText;
     String sceneName;
     Boolean gameEnded = false;
     float timeSinceLoad ;
+    [SerializeField] private TMP_InputField recordName;
+    String recordLevel;
+    float recordTime;
     void Awake()
     {
         if(Instance!=null && Instance !=this)
@@ -41,18 +45,18 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         sceneName = SceneManager.GetActiveScene().name;
-        //pauseMenu.GetComponent<Canvas>().enabled = false;
         LevelText.text = "Level: " + sceneName;
+        AudioManager.Instance.PlayMusic(AudioManager.Instance.levelMusic);
     }
     void Update()
     {
         Pause();
         timeSinceLoad = Time.timeSinceLevelLoad;
-        TimeText.text = ""+ Math.Round(timeSinceLoad, 0);
+        TimeText.text = ""+ Math.Floor(timeSinceLoad);
     }
     void Pause()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && !gameEnded )
+        if ( (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace) )&& !gameEnded )
         {
             if (pauseMenu.GetComponent<Canvas>().isActiveAndEnabled == false)
             {
@@ -76,16 +80,27 @@ public class GameManager : MonoBehaviour
         StartCoroutine( WaitTimeThenLoad(2) );
     }
 
-    void Win(String l, float t)
+    void Win(String l)
     {
         gameEnded = true;
-        DisplayPauseMenu("Win");
-        LevelManager.Instance.UpdateLevelData(l, t);
-        DatabaseManager.Instance.SaveLevelTime(l, "player", t);
-
         Time.timeScale = 0;
+        float t = timeSinceLoad;
         
-        StartCoroutine( WaitTimeThenLoad(2) );
+        LevelManager.Instance.UpdateLevelData(l, t);
+        
+        float timeToBeat = DatabaseManager.Instance.GetTopTime(l);
+        if (t < timeToBeat || timeToBeat == -1)
+        {
+            recordTime = t;
+            recordLevel = l;
+            DisplayRecordTimeMenu();
+        }
+        else
+        {
+            DisplayPauseMenu("Win");
+            StartCoroutine( WaitTimeThenLoad(2) );
+        }
+        
     }
 
     public Boolean IsGameOver()
@@ -126,5 +141,22 @@ public class GameManager : MonoBehaviour
         }
         pauseMenu.GetComponent<Canvas>().enabled = true;
 
+    }
+
+    public void RecordPlayerName(String name)
+    {
+        
+        string playerName = recordName.text;
+        if (playerName.Length > 5) 
+        {
+            playerName = playerName.Substring(0,5);
+        }
+        DatabaseManager.Instance.SaveLevelTime(recordLevel, playerName, recordTime);
+        Time.timeScale = 1;
+        SceneManager.LoadScene("MainMenus");
+    }
+    void DisplayRecordTimeMenu()
+    {
+        recordMenu.GetComponent<Canvas>().enabled = true;
     }
 }

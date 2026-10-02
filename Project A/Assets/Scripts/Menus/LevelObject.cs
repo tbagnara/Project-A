@@ -18,6 +18,8 @@ public class LevelObject : MonoBehaviour
     {
         sp = GetComponent<SpriteRenderer>();
         LevelName = gameObject.name;
+        
+        LevelManager.Instance.LoadData( SaveLoadManager.Instance.GetLevelsBeatenData() );
         LoadSpriteFiles();
         SetSprite();    
     }
@@ -39,7 +41,7 @@ public class LevelObject : MonoBehaviour
             sp.sprite = notAvailable;
         }
 
-        if (LevelManager.Instance.isBeaten(LevelName))
+        if ( LevelManager.Instance.isBeaten(LevelName))
         {
             sp.sprite = isBeaten;
         }
